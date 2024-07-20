@@ -94,8 +94,16 @@ This FastAPI application provides endpoints for uploading, retrieving, and delet
 - **POST `/upload/`**: Upload an image with metadata.
   - Form data: `name` (string), `file` (file)
   
-- **GET `/images/`**: Retrieve a list of all images.
-  
+- **GET `/images/`**: Retrieve a list of all images with their id, name,type and base64 encoded data.
+    Example
+    ```json
+    [{
+        "id": "60f4b3b3b3b3b3b3b3b3b3b3",
+        "name": "image1",
+        "mime_type": "image/png",
+        "data": "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAABjElEQVR42mNkAAYy...=="
+    }]
+    ```
 - **GET `/images/{id}`**: Retrieve a specific image by its ID.
 
 - **DELETE `/delete/{id}`**: Delete a specific image by its ID.
