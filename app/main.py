@@ -29,8 +29,6 @@ def allowed_file(filename: str) -> bool:
 
 @app.post("/upload/")
 async def upload_image(name: str = Form(...) , file: UploadFile = File(...)):
-    print(f"Received name: {name}")
-    print(f"Received file: {file.filename}")
     if not allowed_file(file.filename):
         raise HTTPException(status_code=400, detail="File type not allowed")
 
