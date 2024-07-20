@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+motor
+pydantic[email]
+python-dotenv
+boto3  # If you are using AWS S3 for image storage

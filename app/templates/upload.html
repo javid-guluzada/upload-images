@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Image</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"], input[type="file"] {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        input[type="submit"] {
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            background-color: #007BFF;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #preview {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+        }
+        #preview img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+        }
+        .button {
+            display: block;
+            width: 100%;
+            padding: 12px 0;
+            border: none;
+            border-radius: 4px;
+            background-color: #28a745;
+            color: #fff;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            margin-top: 20px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #218838;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+                margin: 10px;
+            }
+            input[type="text"], input[type="file"], input[type="submit"], .button {
+                width: 100%;
+            }
+        }
+    </style>
+    <script>
+       let allowedFileTypes = [];
+
+async function loadConfig() {
+    try {
+        const response = await fetch('/config/config.json');
+        if (response.ok) {
+            const config = await response.json();
+            allowedFileTypes = config.allowed_file_types || [];
+        } else {
+            console.error('Failed to load configuration.');
+        }
+    } catch (error) {
+        console.error('An error occurred while loading the configuration.', error);
+    }
+}
+
+async function uploadImage(event) {
+    event.preventDefault();
+
+    const fileInput = document.querySelector('input[name="file"]');
+    const nameInput = document.querySelector('input[name="name"]');
+    
+    if (!fileInput.files.length) {
+        alert('Please select a file.');
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const fileType = file.name.split('.').pop().toLowerCase();
+
+    if (allowedFileTypes.length && !allowedFileTypes.includes(fileType)) {
+        alert('Invalid file type.');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('name', nameInput.value);
+    formData.append('file', file);
+
+    try {
+        const response = await fetch('/upload/', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (response.ok) {
+            const result = await response.json();
+            alert('Upload successful!');
+            document.querySelector('form').reset();
+            document.getElementById('preview').style.display = 'none';
+        } else {
+            const error = await response.json();
+            alert(`Upload failed: ${error.detail || 'Please try again.'}`);
+        }
+    } catch (error) {
+        alert('An error occurred. Please try again.');
+        console.error('Upload error:', error);
+    }
+}
+
+
+function previewImage() {
+    const file = document.querySelector('input[type="file"]').files[0];
+    const preview = document.getElementById('preview');
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        preview.style.display = 'block';
+        preview.querySelector('img').src = e.target.result;
+    };
+    if (file) {
+        reader.readAsDataURL(file);
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadConfig);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Upload Image</h1>
+        <form onsubmit="uploadImage(event)" enctype="multipart/form-data">
+            <input name="name" type="text" placeholder="Image Name" required>
+            <input name="file" type="file" accept="image/*" onchange="previewImage()" required>
+            <input type="submit" value="Upload">
+        </form>        
+        <div id="preview">
+            <h2>Image Preview:</h2>
+            <img src="" alt="Image Preview">
+        </div>
+        <a href="/gallery/" class="button">View All Images</a>
+    </div>
+</body>
+</html>

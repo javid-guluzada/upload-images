@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Gallery</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .header a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #0056b3;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .header a:hover {
+            background-color: #003d7a;
+        }
+        .image-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            padding: 20px;
+        }
+        .image-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+        }
+        .image-item img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .delete-button {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 1;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Image Gallery</h1>
+        <a href="/" class="back-button">Back to Upload</a>
+    </div>
+    <div id="image-grid" class="image-grid"></div>
+    <script>
+        async function loadImages() {
+            try {
+                const response = await fetch('/images/');
+                if (response.ok) {
+                    const images = await response.json();
+                    const imageGrid = document.getElementById('image-grid');
+                    images.forEach(image => {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = `data:${image.mime_type};base64,${image.data}`;
+                        imgElement.alt = image.name;
+                        imgElement.title = image.name;
+                        
+                        const deleteButton = document.createElement('button');
+                        deleteButton.className = 'delete-button';
+                        deleteButton.textContent = 'Delete';
+                        deleteButton.onclick = async () => {
+                            if (confirm(`Are you sure you want to delete ${image.name}?`)) {
+                                const deleteResponse = await fetch(`/delete/${image.id}`, { method: 'DELETE' });
+                                if (deleteResponse.ok) {
+                                    alert('Image deleted successfully!');
+                                    window.location.reload(); // Refresh the gallery
+                                } else {
+                                    alert('Failed to delete image.');
+                                }
+                            }
+                        };
+                        
+                        const imgContainer = document.createElement('div');
+                        imgContainer.className = 'image-item';
+                        imgContainer.appendChild(imgElement);
+                        imgContainer.appendChild(deleteButton);
+                        imageGrid.appendChild(imgContainer);
+                    });
+                } else {
+                    alert('Failed to load images.');
+                }
+            } catch (error) {
+                alert('An error occurred while loading images.');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadImages);
+    </script>
+</body>
+</html>
