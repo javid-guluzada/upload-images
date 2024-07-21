@@ -30,7 +30,7 @@ This FastAPI application provides endpoints for uploading, retrieving, and delet
 2. Navigate to the project directory:
 
     ```bash
-    cd your-repo
+    cd upload-images
     ```
 
 3. Create a virtual environment (optional but recommended):
